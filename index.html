@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<title>English Mix Reader v3</title>
+<title>English Mix Reader v4</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f4f6f8;color:#202124;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif}.wrap{max-width:920px;margin:auto;padding:18px 14px 42px}h1{font-size:23px;margin:0 0 4px}.lead{margin:0 0 16px;color:#666;font-size:13px}.card{background:#fff;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 1px 6px #0001}textarea{display:block;width:100%;min-height:190px;padding:12px;border:1px solid #d6d9de;border-radius:10px;font:16px/1.7 inherit;resize:vertical}.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.slider{display:flex;align-items:center;gap:9px;flex:1;min-width:270px}.slider input{width:180px;accent-color:#222}.pct{font-weight:700;min-width:45px}button{border:1px solid #cdd1d7;background:#fff;border-radius:9px;padding:10px 14px;font-size:15px;cursor:pointer}button.primary{background:#222;color:#fff;border-color:#222}button:disabled{opacity:.45;cursor:not-allowed}.section-title{font-weight:700;margin-bottom:9px}#result{font-size:20px;line-height:2.15;white-space:pre-wrap;overflow-wrap:anywhere}.word{border-radius:5px;padding:1px 3px;cursor:pointer}.word.jp{background:#eef3ff;color:#172b4d}.word.unknown{cursor:default}.speech{border-top:1px solid #eee;margin-top:16px;padding-top:14px}.speechrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.state,.note{font-size:12px;color:#666;line-height:1.6}.score{font-size:24px;font-weight:800;margin-top:10px}.transcript{font-size:14px;line-height:1.6;color:#444;margin-top:6px;white-space:pre-wrap}.good{color:#176b2c}.warn{color:#8a5200}.details{margin-top:12px}.details summary{cursor:pointer;font-size:13px;color:#555}.details textarea{min-height:90px;margin-top:8px;font-size:14px;line-height:1.5}.hint{background:#f7f8fa;border-radius:9px;padding:10px;margin-top:10px;font-size:12px;line-height:1.6;color:#555}.diag{margin-top:9px;padding:9px;border-radius:8px;background:#f7f8fa;font-size:12px;line-height:1.6}.legend{font-size:12px;color:#666;margin-top:8px}.jpmark{display:inline-block;background:#eef3ff;border-radius:5px;padding:0 4px}
 @media(max-width:600px){.wrap{padding:13px 10px 28px}h1{font-size:21px}#result{font-size:18px;line-height:2.05}.slider{min-width:100%}.slider input{flex:1}button{padding:10px 12px}}
@@ -20,7 +20,7 @@
 <div class="slider"><span>日本語の量</span><input id="level" type="range" min="0" max="100" value="50" step="5" aria-label="日本語の量"><span id="pct" class="pct">50%</span></div>
 <button class="primary" id="mix">日本語を混ぜる</button><button id="clear">クリア</button>
 </div>
-<p class="note">v3では、文法語・代名詞・前置詞などは日本語にせず、登録された「意味の中心語」だけをヒント化します。英文の語順は変えません。</p>
+<p class="note">v4では、文法語・代名詞・前置詞などは日本語にせず、登録された「意味の中心語」だけをヒント化します。英文の語順は変えません。</p>
 <details class="details"><summary>新しい語の訳を追加する（先生用・任意）</summary>
 <textarea id="custom" placeholder="例：origami=折り紙\nbenefit=利点\nexperience=経験"></textarea>
 <div class="hint">1行に1語。「英単語=日本語」の形。追加した語はスライダーで表示・非表示を調整できます。</div>
@@ -40,24 +40,251 @@
 </section>
 </main>
 <script>
-/* v3: 英文を壊さないため、機械翻訳APIは使用しません。登録済みの内容語だけを日本語ヒントにします。 */
-const FUNCTION_WORDS=new Set(`a an the this that these those my your his her its our their some any each every all both either neither I you he she it we they me him her us them who whom which what where when why how am is are was were be been being do does did have has had can could may might must shall should will would and but or nor so yet for in on at by from to of with about into over under after before during through between among against as than then if because while although though unless until since whether not no never very more most much many few little less own same other another others also just only even still already again too here there up down out off away back for now then than very quite rather almost enough such`.toLowerCase().split(/\s+/));
-const GLOSS={
-origami:'折り紙',benefit:'利点',benefits:'利点',experience:'経験',experiences:'経験',paper:'紙',fold:'折る',folding:'折ること',folded:'折った',professor:'教授',positive:'良い',effect:'効果',effects:'効果',ability:'能力',abilities:'能力',recognize:'認識する',recognizes:'認識する',recognition:'認識',space:'空間',shape:'形',shapes:'形',sheet:'紙',sheets:'紙',enhance:'高める',skill:'技能',skills:'技能',connect:'つなぐ',connected:'つながった',object:'物体',objects:'物体',position:'位置',map:'地図',
-child:'子ども',children:'子どもたち',person:'人',people:'人々',woman:'女性',women:'女性たち',man:'男性',men:'男性たち',student:'生徒',students:'生徒たち',teacher:'教師',teachers:'教師たち',school:'学校',schools:'学校',university:'大学',animal:'動物',animals:'動物たち',world:'世界',life:'生活',lives:'生活',place:'場所',places:'場所',problem:'問題',problems:'問題',reason:'理由',reasons:'理由',example:'例',examples:'例',country:'国',countries:'国々',city:'都市',cities:'都市',water:'水',food:'食べ物',air:'空気',environment:'環境',environmental:'環境の',technology:'技術',nature:'自然',energy:'エネルギー',future:'未来',history:'歴史',society:'社会',research:'研究',information:'情報',language:'言語',languages:'言語',culture:'文化',cultures:'文化',tradition:'伝統',traditions:'伝統',community:'地域社会',communities:'地域社会',knowledge:'知識',idea:'考え',ideas:'考え',method:'方法',methods:'方法',result:'結果',results:'結果',purpose:'目的',challenge:'課題',challenges:'課題',choice:'選択',choices:'選択',advantage:'利点',advantages:'利点',disadvantage:'欠点',disadvantages:'欠点',
-important:'重要な',different:'異なる',possible:'可能な',safe:'安全な',dangerous:'危険な',useful:'役立つ',excellent:'優れた',common:'一般的な',special:'特別な',simple:'簡単な',difficult:'難しい',similar:'似た',natural:'自然な',local:'地域の',global:'世界的な',social:'社会的な',cultural:'文化的な',scientific:'科学的な',modern:'現代の',traditional:'伝統的な',main:'主な',major:'主要な',basic:'基本的な',necessary:'必要な',available:'利用できる',
-use:'使う',uses:'使う',used:'使われる',using:'使う',make:'作る',makes:'作る',made:'作った',build:'建てる',builds:'建てる',built:'建てた',create:'作る',creates:'作る',created:'作った',protect:'守る',protects:'守る',protected:'守られた',learn:'学ぶ',learns:'学ぶ',learned:'学んだ',learning:'学ぶこと',understand:'理解する',understands:'理解する',understood:'理解した',live:'暮らす',lived:'暮らした',find:'見つける',finds:'見つける',found:'見つけた',help:'助ける',helps:'助ける',helped:'助けた',need:'必要とする',needs:'必要とする',needed:'必要とした',want:'望む',wants:'望む',wanted:'望んだ',become:'～になる',becomes:'～になる',became:'～になった',know:'知っている',knows:'知っている',knew:'知っていた',think:'考える',thinks:'考える',thought:'考えた',believe:'信じる',believes:'信じる',believed:'信じた',give:'与える',gives:'与える',gave:'与えた',take:'取る',takes:'取る',took:'取った',get:'得る',gets:'得る',got:'得た',keep:'保つ',keeps:'保つ',kept:'保った',provide:'提供する',provides:'提供する',provided:'提供した',include:'含む',includes:'含む',included:'含まれた',cause:'引き起こす',causes:'引き起こす',caused:'引き起こした',improve:'改善する',improves:'改善する',improved:'改善した',increase:'増加させる',increases:'増加させる',increased:'増加した',reduce:'減らす',reduces:'減らす',reduced:'減らした',develop:'発達させる',develops:'発達させる',developed:'発達した',change:'変える',changes:'変える',changed:'変えた',discover:'発見する',discovered:'発見した',discovery:'発見',invent:'発明する',invented:'発明した',invention:'発明',save:'救う',saved:'救った',support:'支援する',supported:'支援された',share:'共有する',shared:'共有した',communicate:'意思疎通する',communication:'コミュニケーション',travel:'旅行する',traveled:'旅行した',visit:'訪れる',visited:'訪れた',
-probably:'おそらく',usually:'通常',often:'しばしば',sometimes:'ときどき',however:'しかし',therefore:'したがって',especially:'特に',perhaps:'おそらく',actually:'実際に',finally:'最終的に',first:'最初に',second:'2番目に',recently:'最近',usually:'通常'
+/* v4: 英文を壊さないため、機械翻訳APIは使用しません。登録済みの内容語だけを日本語ヒントにします。 */
+const FUNCTION_WORDS = new Set(`
+a an the and or but so because if when while although though as
+of to in on at by for from with about into over under after before
+during through between among against without within upon
+is am are was were be been being do does did have has had
+can could will would shall should may might must
+i you he she it we they me him her us them my your his its our their
+this that these those who which what where when why how
+there here not no very too also just than then
+some any each every all both either neither many much more most
+one two first second
+`.trim().split(/\s+/));
+
+/*
+  v4:
+  We do not translate words simply because they are difficult.
+  We select expressions that have high English-learning value:
+  - phrasal/prepositional expressions
+  - collocations
+  - useful sentence chunks
+  - reusable academic/general-English expressions
+
+  The English remains in its original word order. Japanese is inserted
+  immediately after the selected English chunk.
+*/
+const LEARNING_PHRASES = [
+  ["according to", "～によると", 100],
+  ["have the experience of", "～した経験がある", 95],
+  ["experience of", "～の経験", 82],
+  ["fascinating aspects", "興味深い側面", 96],
+  ["positive effects", "良い効果", 92],
+  ["effects on", "～への効果", 88],
+  ["on your brain", "あなたの脳に", 94],
+  ["on the brain", "脳に", 88],
+  ["effect on", "～への効果", 90],
+  ["in order to", "～するために", 96],
+  ["be able to", "～することができる", 94],
+  ["be likely to", "～しそうである", 90],
+  ["as a result", "その結果", 90],
+  ["for example", "例えば", 88],
+  ["such as", "～のような", 92],
+  ["in addition", "さらに", 86],
+  ["instead of", "～の代わりに", 92],
+  ["rather than", "～よりむしろ", 92],
+  ["because of", "～のために", 90],
+  ["due to", "～のために", 88],
+  ["lead to", "～につながる", 94],
+  ["result in", "～という結果になる", 92],
+  ["help you", "あなたが～するのを助ける", 82],
+  ["help us", "私たちが～するのを助ける", 82],
+  ["help people", "人々が～するのを助ける", 82],
+  ["make it possible", "それを可能にする", 94],
+  ["allow you to", "あなたが～することを可能にする", 94],
+  ["allow people to", "人々が～することを可能にする", 92],
+  ["be interested in", "～に興味がある", 94],
+  ["be good at", "～が得意である", 92],
+  ["be different from", "～と異なる", 90],
+  ["be similar to", "～に似ている", 88],
+  ["take part in", "～に参加する", 92],
+  ["pay attention to", "～に注意を払う", 94],
+  ["take care of", "～の世話をする", 92],
+  ["find out", "～を知る・見つけ出す", 92],
+  ["look for", "～を探す", 88],
+  ["look at", "～を見る", 72],
+  ["think about", "～について考える", 82],
+  ["talk about", "～について話す", 82],
+  ["learn about", "～について学ぶ", 86],
+  ["consist of", "～から成る", 94],
+  ["be made of", "～でできている", 92],
+  ["be made from", "～から作られている", 92],
+  ["be used to", "～に慣れている", 92],
+  ["used to", "以前は～したものだ", 90],
+  ["one of the", "～のうちの一つ", 78],
+  ["some of the", "～のいくつか", 78],
+  ["a number of", "多数の～", 88],
+  ["a variety of", "さまざまな～", 90],
+  ["the ability to", "～する能力", 94],
+  ["ability to", "～する能力", 90],
+  ["the skill of", "～する技能", 90],
+  ["skill of", "～する技能", 86],
+  ["the ability of", "～の能力", 84],
+  ["connect A and B", "AとBをつなぐ", 96]
+];
+
+const LEARNING_WORDS = {
+  benefit: ["利点", 82],
+  benefits: ["利点", 82],
+  experience: ["経験", 72],
+  fascinating: ["興味深い", 84],
+  aspect: ["側面", 78],
+  aspects: ["側面", 78],
+  positive: ["良い", 76],
+  effect: ["効果", 78],
+  effects: ["効果", 78],
+  recognize: ["認識する", 84],
+  ability: ["能力", 84],
+  enhance: ["高める", 84],
+  skill: ["技能", 82],
+  connect: ["つなぐ", 78],
+  connecting: ["つなぐこと", 80],
+  object: ["物体", 72],
+  objects: ["物体", 72],
+  position: ["位置", 72],
+  shape: ["形", 68],
+  sheet: ["一枚の紙", 68],
+  professor: ["教授", 62],
+  improve: ["改善する", 78],
+  improve: ["改善する", 78],
+  improving: ["改善すること", 78],
+  fold: ["折る", 72],
+  folding: ["折ること", 78],
+  square: ["正方形", 62],
+  space: ["空間", 76],
+  brain: ["脳", 60],
+  complex: ["複雑な", 72],
+  creative: ["創造的な", 72],
+  process: ["過程", 74]
 };
-let expected=[];let recognition=null;let recognizing=false;let finalText='';
-function tokenize(s){return s.match(/\s+|[A-Za-z]+(?:['’-][A-Za-z]+)*|[^A-Za-z\s]/g)||[]}
-function isWord(t){return /^[A-Za-z]+(?:['’-][A-Za-z]+)*$/.test(t)}
-function key(t){return t.toLowerCase().replace(/[’']/g,"'")}
-function isContent(t){return isWord(t)&&!FUNCTION_WORDS.has(key(t))&&key(t).length>1}
-function customMap(){const m={};for(const line of (document.getElementById('custom').value||'').split(/\n/)){const p=line.indexOf('=');if(p>0){const k=key(line.slice(0,p).trim()),v=line.slice(p+1).trim();if(k&&v)m[k]=v}}return m}
-function getGloss(t){const k=key(t);return customMap()[k]||GLOSS[k]||null}
-function stableScore(t){let h=2166136261;for(const c of key(t)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return (h>>>0)%100}
-function render(level){const result=document.getElementById('result');result.innerHTML='';const src=document.getElementById('src').value.trim();if(!src)return;for(const t of tokenize(src)){if(!isWord(t)){result.appendChild(document.createTextNode(t));continue}const s=document.createElement('span');s.className='word';s.dataset.en=t;s.textContent=t;const jp=getGloss(t);if(isContent(t)&&jp&&stableScore(t)<level){s.classList.add('jp');s.dataset.jp=jp;s.textContent=jp;s.title=`${t} ⇄ ${jp}`}else if(isContent(t)&&!jp)s.classList.add('unknown');s.addEventListener('click',()=>{if(!s.dataset.jp)return;s.classList.toggle('jp');s.textContent=s.classList.contains('jp')?s.dataset.jp:s.dataset.en});result.appendChild(s)}}
+
+function tokenize(text) {
+  return text.match(/[A-Za-z]+(?:'[A-Za-z]+)?|[0-9]+|[^A-Za-z0-9\s]/g) || [];
+}
+
+function normToken(s) {
+  return s.toLowerCase().replace(/[.,!?;:()[\]{}"“”‘’]/g, "");
+}
+
+function findPhraseMatches(tokens) {
+  const words = tokens.map(normToken);
+  const matches = [];
+
+  LEARNING_PHRASES.forEach(([phrase, jp, value]) => {
+    const p = phrase.toLowerCase().split(/\s+/);
+    // Skip entries containing placeholders such as A/B; they are not literal matches.
+    if (p.some(x => /^[ab]$/.test(x))) return;
+
+    for (let i = 0; i <= words.length - p.length; i++) {
+      let ok = true;
+      for (let j = 0; j < p.length; j++) {
+        if (words[i + j] !== p[j]) { ok = false; break; }
+      }
+      if (ok) matches.push({start:i, end:i+p.length, jp, value});
+    }
+  });
+
+  // Prefer longer chunks, then higher learning value.
+  matches.sort((a,b) =>
+    (b.end-b.start) - (a.end-a.start) || b.value-a.value || a.start-b.start
+  );
+
+  const occupied = new Set();
+  const selected = [];
+  for (const m of matches) {
+    let overlap = false;
+    for (let i=m.start; i<m.end; i++) {
+      if (occupied.has(i)) { overlap=true; break; }
+    }
+    if (overlap) continue;
+    for (let i=m.start; i<m.end; i++) occupied.add(i);
+    selected.push(m);
+  }
+  selected.sort((a,b)=>a.start-b.start);
+  return selected;
+}
+
+function stableHash(s) {
+  let h = 2166136261;
+  for (let i=0;i<s.length;i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967296;
+}
+
+function chooseLearningHints(tokens, level) {
+  const phraseMatches = findPhraseMatches(tokens);
+  const hints = [];
+
+  // Phrase selection is deterministic so the display does not jump around.
+  for (const m of phraseMatches) {
+    const probability = Math.max(0, Math.min(1, level / 100 * (m.value / 100)));
+    if (stableHash(tokens.slice(m.start,m.end).map(normToken).join(" ")) < probability) {
+      hints.push(m);
+    }
+  }
+
+  // Only use individual words when they are not inside an already selected phrase.
+  const covered = new Set();
+  hints.forEach(h => {
+    for (let i=h.start;i<h.end;i++) covered.add(i);
+  });
+
+  tokens.forEach((tok,i) => {
+    const w = normToken(tok);
+    if (!w || FUNCTION_WORDS.has(w) || covered.has(i)) return;
+    const item = LEARNING_WORDS[w];
+    if (!item) return;
+    const [jp,value] = item;
+    const probability = Math.max(0, Math.min(1, level / 100 * (value / 100)));
+    if (stableHash(w + ":" + i) < probability) {
+      hints.push({start:i,end:i+1,jp,value});
+    }
+  });
+
+  hints.sort((a,b)=>a.start-b.start);
+  return hints;
+}
+
+function render(level) {
+  const tokens = tokenize(source.value);
+  const hints = chooseLearningHints(tokens, level);
+  const byStart = new Map();
+  hints.forEach(h => byStart.set(h.start, h));
+
+  let out = "";
+  let i = 0;
+
+  while (i < tokens.length) {
+    const h = byStart.get(i);
+    if (h) {
+      const english = tokens.slice(h.start,h.end).join(" ");
+      out += `<span class="en">${english}</span><span class="jp">${escapeHtml(h.jp)}</span>`;
+      i = h.end;
+      continue;
+    }
+
+    const tok = tokens[i];
+    if (/^[A-Za-z0-9]+(?:'[A-Za-z0-9]+)?$/.test(tok)) {
+      out += `<span class="en">${escapeHtml(tok)}</span>`;
+    } else {
+      out += escapeHtml(tok);
+    }
+
+    // Restore natural spacing between ordinary tokens.
+    if (i < tokens.length - 1 && !/^[,.;:!?)]/.test(tokens[i+1]) && !/^[([.]/.test(tok)) {
+      out += " ";
+    }
+    i++;
+  }
+
+  result.innerHTML = out || `<span class="placeholder">ここにミックス英文が表示されます。</span>`;
+  count.textContent = `${hints.length}個の学習ヒント`;
+}
+
 function mix(){stopSpeech();const src=document.getElementById('src').value.trim();if(!src){document.getElementById('status').textContent='本文を入力してください。';return}expected=tokenize(src).filter(isWord).map(key);const ts=tokenize(src);const contentCount=ts.filter(isContent).length;const known=ts.filter(t=>isContent(t)&&getGloss(t)).length;render(Number(document.getElementById('level').value));document.getElementById('status').textContent=`完成：意味の中心語 ${contentCount}語のうち、${known}語に日本語ヒントがあります。`;
  document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent=''}
 function normalize(s){return s.toLowerCase().replace(/[^a-z'\s-]/g,' ').replace(/\s+/g,' ').trim().split(' ').filter(Boolean)}
