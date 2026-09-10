@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Lesson 4: The Benefits of Origami — Mix Reader</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6f8;color:#202124;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif}.wrap{max-width:920px;margin:auto;padding:18px 14px 42px}h1{font-size:22px;margin:0 0 4px}.lead{margin:0 0 16px;color:#666;font-size:13px}.card{background:#fff;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 1px 6px #0001}.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.slider{display:flex;align-items:center;gap:9px;flex:1;min-width:270px}.slider input{width:220px;accent-color:#222;flex:1}.pct{font-weight:700;min-width:45px}.section-title{font-weight:700;margin-bottom:9px}#result{font-size:20px;line-height:2.15;overflow-wrap:anywhere}.para{margin:0 0 18px}.seclabel{display:inline-block;color:#9aa0a6;font-weight:700;margin-right:4px}.en{display:inline}.hintword{display:inline-block;border-radius:5px;padding:1px 4px;cursor:pointer;background:#eef3ff;color:#172b4d}.hintword .en{display:none}.hintword .jp{display:inline}.hintword.revealed{background:transparent;color:inherit;padding:1px 3px}.hintword.revealed .en{display:inline}.hintword.revealed .jp{display:none}.speech{border-top:1px solid #eee;margin-top:16px;padding-top:14px}.speechrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.state,.note{font-size:12px;color:#666;line-height:1.6}button{border:1px solid #cdd1d7;background:#fff;border-radius:9px;padding:10px 14px;font-size:15px;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.score{font-size:24px;font-weight:800;margin-top:10px}.transcript{font-size:14px;line-height:1.6;color:#444;margin-top:6px;white-space:pre-wrap}.good{color:#176b2c}.warn{color:#8a5200}.diag{margin-top:9px;padding:9px;border-radius:8px;background:#f7f8fa;font-size:12px;line-height:1.6}.legend{font-size:12px;color:#666;margin-top:8px}.jpmark{display:inline-block;background:#eef3ff;border-radius:5px;padding:0 4px}
+@media(max-width:600px){.wrap{padding:13px 10px 28px}h1{font-size:20px}#result{font-size:18px;line-height:2.05}.slider{min-width:100%}button{padding:10px 12px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Lesson 4: The Benefits of Origami</h1>
+<p class="lead">英文の語順を保ったまま、教科書の訳を足場として読む練習（このレッスン専用・外部辞書や自動翻訳は使用しません）</p>
+<section class="card">
+<div class="controls">
+<div class="slider"><span>日本語の量</span><input id="level" type="range" min="0" max="100" value="50" step="5" aria-label="日本語の量"><span id="pct" class="pct">50%</span></div>
+<button id="reshuffle" type="button">🔀 別の組み合わせ</button>
+</div>
+<p class="note">スライダーが低いうちは、難しいチャンクの中の「鍵となる1語」だけを日本語にします（文全体は訳しません）。スライダーを上げていくと、その語のヒントがチャンク全体の教科書訳に置き換わっていきます。訳はすべて教科書に付属のものをそのまま使用しています。100%で全チャンクが教科書訳の全文表示になります。「別の組み合わせ」を押すと、同じ量のまま表示される箇所を入れ替えられます。</p>
+</section>
+<section class="card">
+<div class="section-title">読む練習</div>
+<div id="result"></div>
+<div class="legend"><span class="jpmark">青い語</span>＝教科書の日本語訳。タップすると英語表示に戻せます。</div>
+<div class="speech">
+<div class="speechrow"><button id="mic">🎙 音読チェックを開始</button><button id="stop" disabled>停止</button><span id="speechState" class="state">マイクはまだ起動していません。</span></div>
+<div id="diag" class="diag">開始すると、まずマイクの利用許可を確認します。</div>
+<div id="score"></div><div id="transcript" class="transcript"></div>
+<p class="note">音読スコアは、認識された英語と本文の単語一致度による簡易評価です。音素レベルの発音評価ではありません。</p>
+</div>
+</section>
+</main>
+<script>
+// ------------------------------------------------------------------
+// This app is dedicated to ONE passage. The English chunks and their
+// Japanese translations below come directly from the teacher's own
+// slash-reading material (spreadsheet), not from any dictionary or
+// translation API. To reuse this app for a different lesson, replace
+// the PASSAGE array with the new text's chunks in the same shape:
+//   { label: "①", chunks: [ { en: "...", jp: "...", end: true|false }, ... ] }
+// "end: true" marks the chunk that ends a sentence (purely informational
+// here; it does not currently change rendering, but is kept in the data
+// in case future layout tweaks want to use it).
+// An optional "priority" number can be added to any chunk to override
+// its default priority (word count) in the slider's reveal order.
+// ------------------------------------------------------------------
+const PASSAGE = [{"label":"①","chunks":[{"en":"Most of you probably have the experience","jp":"おそらくほとんどの皆さんが、経験があるでしょう","end":false,"key":{"word":"experience","jp":"経験"}},{"en":"of folding paper,","jp":"紙を折るという","end":false,"key":{"word":"folding","jp":"折ること"}},{"en":"or origami.","jp":"つまり折り紙を","end":true},{"en":"Today,","jp":"今日は","end":false},{"en":"I’d like to talk about some fascinating aspects","jp":"魅力的な点について、いくつかお話ししたいと思います","end":false,"key":{"word":"fascinating","jp":"魅力的な"}},{"en":"of origami.","jp":"折り紙の","end":true},{"en":"According to a Japanese professor,","jp":"日本のある教授によれば","end":false,"key":{"word":"According to","jp":"～によると"}},{"en":"it has four main positive effects","jp":"それは主に4つの良い効果があります","end":false,"key":{"word":"positive effects","jp":"良い効果"}},{"en":"on your brain.","jp":"皆さんの脳に","end":true,"key":{"word":"brain","jp":"脳"}}]},{"label":"②","chunks":[{"en":"First,","jp":"1つめは","end":false},{"en":"origami can improve your ability","jp":"折り紙は能力を向上させることができます","end":false,"key":{"word":"ability","jp":"能力"}},{"en":"to recognize space.","jp":"空間を認識する","end":true,"key":{"word":"recognize","jp":"認識する"}},{"en":"Making a shape from a square sheet of paper","jp":"1枚の正方形の紙からある形を作ることで","end":false,"key":{"word":"shape","jp":"形"}},{"en":"can enhance the skill","jp":"能力を高めることができます","end":false,"key":{"word":"enhance","jp":"高める"}},{"en":"of connecting 2-D and 3-D objects.","jp":"二次元（平面的な）と三次元（立体的な）の物体を関連付けるという","end":true,"key":{"word":"connecting","jp":"つなげること"}},{"en":"This skill may help you","jp":"この能力はあなたが～をするのに役立つかもしれません","end":false,"key":{"word":"skill","jp":"技能"}},{"en":"find a location from a map.","jp":"地図から場所を見つけるのに","end":true,"key":{"word":"location","jp":"位置"}}]},{"label":"③","chunks":[{"en":"Second,","jp":"２つめは","end":false},{"en":"origami can improve your ability","jp":"折り紙は能力を向上させることができます","end":false,"key":{"word":"ability","jp":"能力"}},{"en":"to control your actions","jp":"行動を制御する","end":false,"key":{"word":"control","jp":"制御する"}},{"en":"based on rules.","jp":"ルールに基づいて","end":true,"key":{"word":"rules","jp":"ルール"}},{"en":"To complete one origami work,","jp":"1つの折り紙作品を完成させるためには","end":false,"key":{"word":"complete","jp":"完成させる"}},{"en":"you need to follow the step-by-step instructions.","jp":"段階的な指示に従う必要があります","end":true,"key":{"word":"instructions","jp":"指示"}},{"en":"Origami can be a good exercise","jp":"折り紙は良い練習になりうるのです","end":false,"key":{"word":"exercise","jp":"練習"}},{"en":"for promoting your self-control.","jp":"自制心を促進させるための","end":true,"key":{"word":"self-control","jp":"自制心"}}]},{"label":"④","chunks":[{"en":"Third,","jp":"３つめは","end":false},{"en":"origami can improve your ability","jp":"折り紙は能力を向上させることができます","end":false,"key":{"word":"ability","jp":"能力"}},{"en":"to accomplish missions","jp":"目標を達成する","end":false,"key":{"word":"accomplish","jp":"達成する"}},{"en":"with passion and patience.","jp":"情熱と忍耐を持って","end":true,"key":{"word":"patience","jp":"忍耐"}},{"en":"Through the experience","jp":"経験を通して","end":false,"key":{"word":"experience","jp":"経験"}},{"en":"of focusing on origami","jp":"折り紙に集中するという","end":false,"key":{"word":"focusing","jp":"集中すること"}},{"en":"for a long time","jp":"長時間","end":false},{"en":"and completing it,","jp":"そして完成させるという","end":false,"key":{"word":"completing","jp":"完成させること"}},{"en":"this ability will be enhanced.","jp":"この能力は高められます","end":true,"key":{"word":"enhanced","jp":"高められる"}},{"en":"This is also said","jp":"これは～とも言われています","end":false},{"en":"to correlate with your academic performance.","jp":"学業成績と相互関係がある","end":true,"key":{"word":"academic performance","jp":"学業成績"}},{"en":"Of course,","jp":"もちろん","end":false},{"en":"you cannot simply say","jp":"単純に言うことはできません","end":false},{"en":"that origami will make you smart.","jp":"折り紙で皆さんが賢くなると","end":true,"key":{"word":"smart","jp":"賢い"}},{"en":"Nevertheless,","jp":"それでも","end":false,"key":{"word":"Nevertheless","jp":"それでも"}},{"en":"the process of hard work","jp":"努力の過程","end":false,"key":{"word":"process","jp":"過程"}},{"en":"and the sense of accomplishment","jp":"と達成感は","end":false,"key":{"word":"accomplishment","jp":"達成感"}},{"en":"will surely have a positive influence","jp":"きっと、良い影響をもたらすでしょう","end":false,"key":{"word":"influence","jp":"影響"}},{"en":"on you.","jp":"皆さんに","end":true}]},{"label":"⑤","chunks":[{"en":"Last but not least,","jp":"最後になりますが","end":false,"key":{"word":"Last but not least","jp":"最後になりますが"}},{"en":"origami can promote your skill","jp":"折り紙は能力を高められます","end":false,"key":{"word":"promote","jp":"高める"}},{"en":"of performing detailed work","jp":"細かい作業をするという","end":false,"key":{"word":"detailed","jp":"細かい"}},{"en":"with your hands.","jp":"手で","end":true},{"en":"It is generally believed","jp":"一般的に～であると信じられています","end":false,"key":{"word":"generally","jp":"一般的に"}},{"en":"that being good or clumsy with your hands","jp":"手先が器用か不器用かは","end":false,"key":{"word":"clumsy","jp":"不器用な"}},{"en":"is an innate ability.","jp":"生まれつきの能力であると","end":true,"key":{"word":"innate","jp":"生まれつきの"}},{"en":"However,","jp":"しかし","end":false,"key":{"word":"However","jp":"しかし"}},{"en":"the skill can be developed","jp":"その能力は伸ばすことができます","end":false,"key":{"word":"developed","jp":"伸ばされる"}},{"en":"at any age","jp":"何歳でも","end":false},{"en":"by training.","jp":"訓練によって","end":true,"key":{"word":"training","jp":"訓練"}},{"en":"Even if you are not good at complicated work,","jp":"たとえ複雑な作業が苦手でも","end":false,"key":{"word":"complicated","jp":"複雑な"}},{"en":"you will be able to overcome your clumsiness","jp":"不器用さは克服できます","end":false,"key":{"word":"overcome","jp":"克服する"}},{"en":"by practicing origami repeatedly.","jp":"折り紙を何度も練習することによって","end":true,"key":{"word":"repeatedly","jp":"繰り返し"}}]},{"label":"⑥","chunks":[{"en":"As you can see,","jp":"お分かりのように","end":false},{"en":"origami has a lot of benefits.","jp":"折り紙には多くの利点があります","end":true,"key":{"word":"benefits","jp":"利点"}},{"en":"Why don’t you make origami a habit?","jp":"折り紙を習慣にしてみませんか","end":true,"key":{"word":"habit","jp":"習慣"}},{"en":"Your potential may be unlocked","jp":"皆さんの潜在能力が解放されるかもしれません","end":false,"key":{"word":"potential","jp":"潜在能力"}},{"en":"while you enjoy creating a variety of shapes","jp":"さまざまな形を作って楽しむ間に","end":false,"key":{"word":"a variety of","jp":"さまざまな"}},{"en":"from colorful square sheets of paper.","jp":"カラフルな正方形の紙から","end":true,"key":{"word":"colorful","jp":"カラフルな"}}]}];
+
+const result = document.getElementById('result');
+let recognition = null;
+let recognizing = false;
+let finalText = '';
+
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// Flatten once: every chunk tagged with its section/chunk index and a
+// stable id ("0_3" etc.) so we can look it up while rendering.
+const ALL_CHUNKS = [];
+PASSAGE.forEach((sec, si) => {
+  sec.chunks.forEach((c, ci) => {
+    ALL_CHUNKS.push({ ...c, si, ci, id: si + '_' + ci });
+  });
+});
+
+// Default priority = word count (a longer chunk is harder to parse at
+// a glance, so it gets scaffolding sooner as the slider goes up).
+// A chunk can override this with an explicit "priority" field in PASSAGE.
+function chunkPriority(c) {
+  if (typeof c.priority === 'number') return c.priority;
+  return c.en.split(/\s+/).filter(Boolean).length;
+}
+
+// The reveal order is base priority (harder chunks first) plus a random
+// jitter, so it stays biased toward the harder chunks but isn't the same
+// exact list every time. Recomputing this (via the reshuffle button) at
+// the same slider level shows the same NUMBER of hints but different ones.
+function computeByPriority() {
+  return ALL_CHUNKS
+    .map(c => ({ c, score: chunkPriority(c) + (Math.random() * 6 - 3) }))
+    .sort((a, b) => b.score - a.score)
+    .map(x => x.c);
+}
+
+let BY_PRIORITY = computeByPriority();
+
+// Two-stage scaffolding, both walking the same hardest-first priority
+// order:
+//   0–50%  : chunks pick up a single key-word gloss (light touch — the
+//            rest of the chunk stays in English).
+//   50–100%: chunks that already have a word-level gloss get upgraded
+//            to the full chunk translation (teacher-provided).
+// At 100%, every chunk is fully translated; at 0%, nothing is hinted.
+function chunkStages(level) {
+  const wordCount = Math.round(ALL_CHUNKS.length * Math.min(level, 50) / 50);
+  const fullCount = Math.round(ALL_CHUNKS.length * Math.max(level - 50, 0) / 50);
+  const fullIds = new Set(BY_PRIORITY.slice(0, fullCount).map(c => c.id));
+  const wordIds = new Set(BY_PRIORITY.slice(0, wordCount).map(c => c.id));
+  const stage = new Map();
+  ALL_CHUNKS.forEach(c => {
+    if (fullIds.has(c.id)) stage.set(c.id, 'full');
+    else if (wordIds.has(c.id)) stage.set(c.id, 'word');
+    else stage.set(c.id, 'none');
+  });
+  return stage;
+}
+
+// Word-stage rendering: only the chunk's designated key word/phrase
+// becomes a tappable hint; everything else in the chunk stays plain
+// English, exactly as it appears in the original sentence.
+function renderWordStage(c) {
+  const { word, jp } = c.key;
+  const idx = c.en.toLowerCase().indexOf(word.toLowerCase());
+  if (idx === -1) return `<span class="en">${escapeHtml(c.en)}</span>`; // safety fallback
+  const before = c.en.slice(0, idx);
+  const match = c.en.slice(idx, idx + word.length);
+  const after = c.en.slice(idx + word.length);
+  return escapeHtml(before)
+    + `<span class="hintword" role="button" tabindex="0" aria-label="タップで英語表示"><span class="en">${escapeHtml(match)}</span><span class="jp">${escapeHtml(jp)}</span></span>`
+    + escapeHtml(after);
+}
+
+function render(level) {
+  const stage = chunkStages(level);
+  const html = PASSAGE.map((sec, si) => {
+    const chunkHtml = sec.chunks.map((c, ci) => {
+      const id = si + '_' + ci;
+      const st = stage.get(id);
+      if (st === 'full') {
+        return `<span class="hintword" role="button" tabindex="0" aria-label="タップで英語表示"><span class="en">${escapeHtml(c.en)}</span><span class="jp">${escapeHtml(c.jp)}</span></span>`;
+      }
+      if (st === 'word' && c.key) {
+        return renderWordStage(c);
+      }
+      return `<span class="en">${escapeHtml(c.en)}</span>`;
+    }).join(' ');
+    return `<p class="para"><span class="seclabel">${sec.label}</span> ${chunkHtml}</p>`;
+  }).join('');
+  result.innerHTML = html;
+}
+
+// Speech-check target: the full passage in original order, tokenized once.
+const FULL_TEXT = ALL_CHUNKS.map(c => c.en).join(' ');
+const expected = (FULL_TEXT.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).map(w => w.toLowerCase());
+
+function normalize(s){return s.toLowerCase().replace(/[^a-z'\s-]/g,' ').replace(/\s+/g,' ').trim().split(' ').filter(Boolean)}
+function editDistance(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function showScore(){const heard=normalize(finalText),n=Math.max(expected.length,heard.length,1),score=Math.max(0,Math.round(100*(1-editDistance(expected,heard)/n)));document.getElementById('score').innerHTML=`<div class="score">音読スコア：${score} / 100</div>`;document.getElementById('transcript').textContent=`認識結果：${finalText.trim()||'（認識できませんでした）'}`}
+async function requestMic(){if(!navigator.mediaDevices?.getUserMedia){document.getElementById('diag').textContent='この端末ではマイク機能を利用できません。';return false}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(t=>t.stop());document.getElementById('diag').innerHTML='<span class="good">✓ マイクの利用許可を確認しました。</span>';return true}catch(e){let msg='マイクを利用できませんでした。';if(e.name==='NotAllowedError')msg='マイクの利用が拒否されています。ブラウザのサイト設定で許可してください。';if(e.name==='NotFoundError')msg='マイクが見つかりませんでした。';document.getElementById('diag').innerHTML=`<span class="warn">${msg}</span>`;return false}}
+function makeRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById('speechState').textContent='このブラウザではブラウザ音声認識が利用できません。';return null}const r=new SR();r.lang='en-US';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>{recognizing=true;document.getElementById('speechState').textContent='音読を認識中… 読み終わったら「停止」を押してください。';document.getElementById('mic').disabled=true;document.getElementById('stop').disabled=false};r.onresult=e=>{let text='';for(let i=e.resultIndex;i<e.results.length;i++)text+=' '+e.results[i][0].transcript;finalText+=(text||'')};r.onerror=e=>{recognizing=false;document.getElementById('speechState').textContent=`音声認識エラー：${e.error}`;document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true};r.onend=()=>{if(recognizing){recognizing=false;document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true;document.getElementById('speechState').textContent='音読チェック終了';showScore()}};return r}
+async function startSpeech(){finalText='';document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent='';if(!await requestMic())return;recognition=makeRecognition();if(!recognition)return;try{recognition.start()}catch(e){document.getElementById('speechState').textContent='音声認識を開始できませんでした。'}}
+function stopSpeech(){if(!recognition||!recognizing)return;recognizing=false;try{recognition.stop()}catch(e){}document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true;document.getElementById('speechState').textContent='音読チェック終了';showScore()}
+
+result.addEventListener('click', e => {
+  const t = e.target.closest('.hintword');
+  if (t) t.classList.toggle('revealed');
+});
+result.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target.closest('.hintword');
+  if (t) { e.preventDefault(); t.classList.toggle('revealed'); }
+});
+document.getElementById('level').addEventListener('input', e => {
+  document.getElementById('pct').textContent = e.target.value + '%';
+  render(Number(e.target.value));
+});
+document.getElementById('mic').addEventListener('click', startSpeech);
+document.getElementById('stop').addEventListener('click', stopSpeech);
+document.getElementById('reshuffle').addEventListener('click', () => {
+  BY_PRIORITY = computeByPriority();
+  render(Number(document.getElementById('level').value));
+});
+
+render(50);
+</script>
+</body>
+</html>
