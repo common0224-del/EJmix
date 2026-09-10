@@ -4,23 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<title>English Mix Reader v2</title>
+<title>English Mix Reader v3</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#f4f6f8;color:#202124;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif}
-.wrap{max-width:920px;margin:auto;padding:18px 14px 42px}
-h1{font-size:23px;margin:0 0 4px}.lead{margin:0 0 16px;color:#666;font-size:13px}
-.card{background:#fff;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 1px 6px #0001}
-textarea{display:block;width:100%;min-height:190px;padding:12px;border:1px solid #d6d9de;border-radius:10px;font:16px/1.7 inherit;resize:vertical}
-.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
-.slider{display:flex;align-items:center;gap:9px;flex:1;min-width:270px}.slider input{width:170px;accent-color:#222}.pct{font-weight:700;min-width:45px}
-button{border:1px solid #cdd1d7;background:#fff;border-radius:9px;padding:10px 14px;font-size:15px;cursor:pointer}button.primary{background:#222;color:#fff;border-color:#222}button:disabled{opacity:.45;cursor:not-allowed}
-.section-title{font-weight:700;margin-bottom:9px}#result{font-size:20px;line-height:2.15;white-space:pre-wrap;overflow-wrap:anywhere}
-.word{border-radius:5px;padding:1px 3px;cursor:pointer}.word.jp{background:#eef3ff;color:#172b4d}.word.unknown{cursor:default}
-.speech{border-top:1px solid #eee;margin-top:16px;padding-top:14px}.speechrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.state,.note{font-size:12px;color:#666;line-height:1.6}.score{font-size:24px;font-weight:800;margin-top:10px}.transcript{font-size:14px;line-height:1.6;color:#444;margin-top:6px;white-space:pre-wrap}.good{color:#176b2c}.warn{color:#8a5200}
-.details{margin-top:12px}.details summary{cursor:pointer;font-size:13px;color:#555}.details textarea{min-height:90px;margin-top:8px;font-size:14px;line-height:1.5}.hint{background:#f7f8fa;border-radius:9px;padding:10px;margin-top:10px;font-size:12px;line-height:1.6;color:#555}
-.diag{margin-top:9px;padding:9px;border-radius:8px;background:#f7f8fa;font-size:12px;line-height:1.6}
+*{box-sizing:border-box}body{margin:0;background:#f4f6f8;color:#202124;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif}.wrap{max-width:920px;margin:auto;padding:18px 14px 42px}h1{font-size:23px;margin:0 0 4px}.lead{margin:0 0 16px;color:#666;font-size:13px}.card{background:#fff;border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 1px 6px #0001}textarea{display:block;width:100%;min-height:190px;padding:12px;border:1px solid #d6d9de;border-radius:10px;font:16px/1.7 inherit;resize:vertical}.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.slider{display:flex;align-items:center;gap:9px;flex:1;min-width:270px}.slider input{width:180px;accent-color:#222}.pct{font-weight:700;min-width:45px}button{border:1px solid #cdd1d7;background:#fff;border-radius:9px;padding:10px 14px;font-size:15px;cursor:pointer}button.primary{background:#222;color:#fff;border-color:#222}button:disabled{opacity:.45;cursor:not-allowed}.section-title{font-weight:700;margin-bottom:9px}#result{font-size:20px;line-height:2.15;white-space:pre-wrap;overflow-wrap:anywhere}.word{border-radius:5px;padding:1px 3px;cursor:pointer}.word.jp{background:#eef3ff;color:#172b4d}.word.unknown{cursor:default}.speech{border-top:1px solid #eee;margin-top:16px;padding-top:14px}.speechrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.state,.note{font-size:12px;color:#666;line-height:1.6}.score{font-size:24px;font-weight:800;margin-top:10px}.transcript{font-size:14px;line-height:1.6;color:#444;margin-top:6px;white-space:pre-wrap}.good{color:#176b2c}.warn{color:#8a5200}.details{margin-top:12px}.details summary{cursor:pointer;font-size:13px;color:#555}.details textarea{min-height:90px;margin-top:8px;font-size:14px;line-height:1.5}.hint{background:#f7f8fa;border-radius:9px;padding:10px;margin-top:10px;font-size:12px;line-height:1.6;color:#555}.diag{margin-top:9px;padding:9px;border-radius:8px;background:#f7f8fa;font-size:12px;line-height:1.6}.legend{font-size:12px;color:#666;margin-top:8px}.jpmark{display:inline-block;background:#eef3ff;border-radius:5px;padding:0 4px}
 @media(max-width:600px){.wrap{padding:13px 10px 28px}h1{font-size:21px}#result{font-size:18px;line-height:2.05}.slider{min-width:100%}.slider input{flex:1}button{padding:10px 12px}}
 </style>
 </head>
@@ -28,119 +14,60 @@ button{border:1px solid #cdd1d7;background:#fff;border-radius:9px;padding:10px 1
 <main class="wrap">
 <h1>English Mix Reader</h1>
 <p class="lead">英文の語順を保ったまま、日本語を足場として読む練習</p>
-
 <section class="card">
 <textarea id="src" placeholder="教科書本文をここに貼り付けてください。"></textarea>
 <div class="controls">
-  <div class="slider">
-    <span>日本語の量</span>
-    <input id="level" type="range" min="0" max="100" value="50" step="5" aria-label="日本語の量">
-    <span id="pct" class="pct">50%</span>
-  </div>
-  <button class="primary" id="mix">日本語を混ぜる</button>
-  <button id="clear">クリア</button>
+<div class="slider"><span>日本語の量</span><input id="level" type="range" min="0" max="100" value="50" step="5" aria-label="日本語の量"><span id="pct" class="pct">50%</span></div>
+<button class="primary" id="mix">日本語を混ぜる</button><button id="clear">クリア</button>
 </div>
-<p class="note">日本語になるのは、文法語ではなく意味の中心になりやすい語です。日本語訳が登録されていない語は、誤訳を防ぐため英語のまま残します。</p>
-<details class="details">
-  <summary>新しい語の訳を追加する（任意）</summary>
-  <textarea id="custom" placeholder="例：origami=折り紙\nbeaver=ビーバー\nbenefit=利点"></textarea>
-  <div class="hint">1行に1語。「英単語=日本語」の形で入力してください。入力後に「日本語を混ぜる」を押すと反映されます。</div>
+<p class="note">v3では、文法語・代名詞・前置詞などは日本語にせず、登録された「意味の中心語」だけをヒント化します。英文の語順は変えません。</p>
+<details class="details"><summary>新しい語の訳を追加する（先生用・任意）</summary>
+<textarea id="custom" placeholder="例：origami=折り紙\nbenefit=利点\nexperience=経験"></textarea>
+<div class="hint">1行に1語。「英単語=日本語」の形。追加した語はスライダーで表示・非表示を調整できます。</div>
 </details>
 </section>
-
 <section class="card">
 <div class="section-title">読む練習</div>
 <div id="status" class="state">本文を入力して「日本語を混ぜる」を押してください。</div>
 <div id="result"></div>
-
+<div class="legend"><span class="jpmark">青い語</span>＝日本語ヒント。タップすると英語に戻せます。</div>
 <div class="speech">
-<div class="speechrow">
-<button id="mic">🎙 音読チェックを開始</button>
-<button id="stop" disabled>停止</button>
-<span id="speechState" class="state">マイクはまだ起動していません。</span>
-</div>
+<div class="speechrow"><button id="mic">🎙 音読チェックを開始</button><button id="stop" disabled>停止</button><span id="speechState" class="state">マイクはまだ起動していません。</span></div>
 <div id="diag" class="diag">開始すると、まずマイクの利用許可を確認します。</div>
-<div id="score"></div>
-<div id="transcript" class="transcript"></div>
-<p class="note">音読チェックは「認識された英語と本文の一致度」を100点満点で表示します。発音記号・音素レベルの精密な発音評価ではありません。</p>
+<div id="score"></div><div id="transcript" class="transcript"></div>
+<p class="note">音読スコアは、認識された英語と本文の単語一致度による簡易評価です。音素レベルの発音評価ではありません。</p>
 </div>
 </section>
 </main>
-
 <script>
-/* English Mix Reader v2
-   方針：文法語は原則として英語のまま。登録済みの内容語だけを日本語化。
-   未登録語を機械翻訳で無理に置き換えないことで、不自然な日本語の混入を防ぐ。
-*/
-const STOP=new Set(`a an the this that these those my your his her its our their some any each every all both either neither i you he she it we they me him her us them who whom which what where when why how am is are was were be been being do does did have has had can could may might must shall should will would and but or nor so yet for in on at by from to of with about into over under after before during through between among against as than then if because while although though unless until since whether not no very more most much many few little own same other another also just only even still already again too here there up down out off away back`.trim().split(/\s+/));
-const DICT={
-children:"子どもたち",child:"子ども",people:"人々",person:"人",women:"女性たち",woman:"女性",men:"男性たち",man:"男性",students:"生徒たち",student:"生徒",teachers:"教師たち",teacher:"教師",schools:"学校",school:"学校",animals:"動物たち",animal:"動物",world:"世界",life:"生活",lives:"生活",place:"場所",places:"場所",problem:"問題",problems:"問題",important:"重要な",different:"異なる",possible:"可能な",safe:"安全な",dangerous:"危険な",useful:"役立つ",excellent:"優れた",use:"使う",used:"使われる",uses:"使う",using:"使う",make:"作る",makes:"作る",made:"作った",build:"建てる",builds:"建てる",built:"建てた",create:"作る",creates:"作る",created:"作った",protect:"守る",protects:"守る",protected:"守られた",learn:"学ぶ",learns:"学ぶ",learned:"学んだ",learning:"学ぶこと",understand:"理解する",understands:"理解する",understood:"理解した",live:"暮らす",lived:"暮らした",find:"見つける",finds:"見つける",found:"見つけた",help:"助ける",helps:"助ける",helped:"助けた",need:"必要とする",needs:"必要とする",needed:"必要とした",want:"望む",wants:"望む",wanted:"望んだ",become:"～になる",becomes:"～になる",became:"～になった",become:"～になる",know:"知っている",knows:"知っている",knew:"知っていた",think:"考える",thinks:"考える",thought:"考えた",believe:"信じる",believes:"信じる",believed:"信じた",give:"与える",gives:"与える",gave:"与えた",take:"取る",takes:"取る",took:"取った",get:"得る",gets:"得る",got:"得た",keep:"保つ",keeps:"保つ",kept:"保った",provide:"提供する",provides:"提供する",provided:"提供した",include:"含む",includes:"含む",included:"含まれた",cause:"引き起こす",causes:"引き起こす",caused:"引き起こした",improve:"改善する",improves:"改善する",improved:"改善した",increase:"増加させる",increases:"増加させる",increased:"増加した",reduce:"減らす",reduces:"減らす",reduced:"減らした",develop:"発達させる",develops:"発達させる",developed:"発達した",change:"変える",changes:"変える",changed:"変えた",experience:"経験",experiences:"経験",reason:"理由",reasons:"理由",example:"例",examples:"例",country:"国",countries:"国々",city:"都市",cities:"都市",water:"水",food:"食べ物",air:"空気",environment:"環境",environmental:"環境の",technology:"技術",nature:"自然",energy:"エネルギー",future:"未来",history:"歴史",society:"社会",research:"研究",information:"情報",language:"言語",languages:"言語",culture:"文化",cultures:"文化",tradition:"伝統",traditions:"伝統",community:"地域社会",communities:"地域社会",benefit:"利点",benefits:"利点",ability:"能力",abilities:"能力",skill:"技能",skills:"技能",knowledge:"知識",idea:"考え",ideas:"考え",method:"方法",methods:"方法",effect:"効果",effects:"効果",result:"結果",results:"結果",purpose:"目的",purposes:"目的",advantage:"利点",advantages:"利点",disadvantage:"欠点",disadvantages:"欠点",challenge:"課題",challenges:"課題",choice:"選択",choices:"選択",experience:"経験",paper:"紙",papers:"紙",fold:"折る",folding:"折ること",origami:"折り紙",beaver:"ビーバー",beavers:"ビーバーたち",robot:"ロボット",robots:"ロボットたち",wheelchair:"車いす",traveler:"旅行者",travelers:"旅行者たち",flight:"飛行",flying:"飛んでいる",vehicle:"乗り物",vehicles:"乗り物",education:"教育",student:"生徒",teacher:"教師",school:"学校",university:"大学",government:"政府",company:"会社",companies:"会社",future:"未来",scientist:"科学者",scientists:"科学者たち",discover:"発見する",discovered:"発見した",discovery:"発見",invent:"発明する",invented:"発明した",invention:"発明",save:"救う",saved:"救った",support:"支援する",supported:"支援された",share:"共有する",shared:"共有した",communicate:"意思疎通する",communication:"コミュニケーション",possible:"可能な",probably:"おそらく",usually:"通常",often:"しばしば",sometimes:"ときどき",however:"しかし",therefore:"したがって",especially:"特に",perhaps:"おそらく",actually:"実際に",finally:"最終的に"
+/* v3: 英文を壊さないため、機械翻訳APIは使用しません。登録済みの内容語だけを日本語ヒントにします。 */
+const FUNCTION_WORDS=new Set(`a an the this that these those my your his her its our their some any each every all both either neither I you he she it we they me him her us them who whom which what where when why how am is are was were be been being do does did have has had can could may might must shall should will would and but or nor so yet for in on at by from to of with about into over under after before during through between among against as than then if because while although though unless until since whether not no never very more most much many few little less own same other another others also just only even still already again too here there up down out off away back for now then than very quite rather almost enough such`.toLowerCase().split(/\s+/));
+const GLOSS={
+origami:'折り紙',benefit:'利点',benefits:'利点',experience:'経験',experiences:'経験',paper:'紙',fold:'折る',folding:'折ること',folded:'折った',professor:'教授',positive:'良い',effect:'効果',effects:'効果',ability:'能力',abilities:'能力',recognize:'認識する',recognizes:'認識する',recognition:'認識',space:'空間',shape:'形',shapes:'形',sheet:'紙',sheets:'紙',enhance:'高める',skill:'技能',skills:'技能',connect:'つなぐ',connected:'つながった',object:'物体',objects:'物体',position:'位置',map:'地図',
+child:'子ども',children:'子どもたち',person:'人',people:'人々',woman:'女性',women:'女性たち',man:'男性',men:'男性たち',student:'生徒',students:'生徒たち',teacher:'教師',teachers:'教師たち',school:'学校',schools:'学校',university:'大学',animal:'動物',animals:'動物たち',world:'世界',life:'生活',lives:'生活',place:'場所',places:'場所',problem:'問題',problems:'問題',reason:'理由',reasons:'理由',example:'例',examples:'例',country:'国',countries:'国々',city:'都市',cities:'都市',water:'水',food:'食べ物',air:'空気',environment:'環境',environmental:'環境の',technology:'技術',nature:'自然',energy:'エネルギー',future:'未来',history:'歴史',society:'社会',research:'研究',information:'情報',language:'言語',languages:'言語',culture:'文化',cultures:'文化',tradition:'伝統',traditions:'伝統',community:'地域社会',communities:'地域社会',knowledge:'知識',idea:'考え',ideas:'考え',method:'方法',methods:'方法',result:'結果',results:'結果',purpose:'目的',challenge:'課題',challenges:'課題',choice:'選択',choices:'選択',advantage:'利点',advantages:'利点',disadvantage:'欠点',disadvantages:'欠点',
+important:'重要な',different:'異なる',possible:'可能な',safe:'安全な',dangerous:'危険な',useful:'役立つ',excellent:'優れた',common:'一般的な',special:'特別な',simple:'簡単な',difficult:'難しい',similar:'似た',natural:'自然な',local:'地域の',global:'世界的な',social:'社会的な',cultural:'文化的な',scientific:'科学的な',modern:'現代の',traditional:'伝統的な',main:'主な',major:'主要な',basic:'基本的な',necessary:'必要な',available:'利用できる',
+use:'使う',uses:'使う',used:'使われる',using:'使う',make:'作る',makes:'作る',made:'作った',build:'建てる',builds:'建てる',built:'建てた',create:'作る',creates:'作る',created:'作った',protect:'守る',protects:'守る',protected:'守られた',learn:'学ぶ',learns:'学ぶ',learned:'学んだ',learning:'学ぶこと',understand:'理解する',understands:'理解する',understood:'理解した',live:'暮らす',lived:'暮らした',find:'見つける',finds:'見つける',found:'見つけた',help:'助ける',helps:'助ける',helped:'助けた',need:'必要とする',needs:'必要とする',needed:'必要とした',want:'望む',wants:'望む',wanted:'望んだ',become:'～になる',becomes:'～になる',became:'～になった',know:'知っている',knows:'知っている',knew:'知っていた',think:'考える',thinks:'考える',thought:'考えた',believe:'信じる',believes:'信じる',believed:'信じた',give:'与える',gives:'与える',gave:'与えた',take:'取る',takes:'取る',took:'取った',get:'得る',gets:'得る',got:'得た',keep:'保つ',keeps:'保つ',kept:'保った',provide:'提供する',provides:'提供する',provided:'提供した',include:'含む',includes:'含む',included:'含まれた',cause:'引き起こす',causes:'引き起こす',caused:'引き起こした',improve:'改善する',improves:'改善する',improved:'改善した',increase:'増加させる',increases:'増加させる',increased:'増加した',reduce:'減らす',reduces:'減らす',reduced:'減らした',develop:'発達させる',develops:'発達させる',developed:'発達した',change:'変える',changes:'変える',changed:'変えた',discover:'発見する',discovered:'発見した',discovery:'発見',invent:'発明する',invented:'発明した',invention:'発明',save:'救う',saved:'救った',support:'支援する',supported:'支援された',share:'共有する',shared:'共有した',communicate:'意思疎通する',communication:'コミュニケーション',travel:'旅行する',traveled:'旅行した',visit:'訪れる',visited:'訪れた',
+probably:'おそらく',usually:'通常',often:'しばしば',sometimes:'ときどき',however:'しかし',therefore:'したがって',especially:'特に',perhaps:'おそらく',actually:'実際に',finally:'最終的に',first:'最初に',second:'2番目に',recently:'最近',usually:'通常'
 };
-const cache=new Map();
-let expected=[];let recognition=null;let recognizing=false;let finalText="";
-
-function tokens(s){return s.match(/\s+|[A-Za-z]+(?:['’-][A-Za-z]+)*|[^A-Za-z\s]/g)||[]}
+let expected=[];let recognition=null;let recognizing=false;let finalText='';
+function tokenize(s){return s.match(/\s+|[A-Za-z]+(?:['’-][A-Za-z]+)*|[^A-Za-z\s]/g)||[]}
 function isWord(t){return /^[A-Za-z]+(?:['’-][A-Za-z]+)*$/.test(t)}
-function normWord(t){return t.toLowerCase().replace(/[’']/g,"'")}
-function content(t){return isWord(t)&&!STOP.has(normWord(t))&&normWord(t).length>1}
-function seeded(t){let h=0,s=normWord(t);for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h%100}
-function customMap(){const m={};const text=document.getElementById('custom').value||'';for(const line of text.split(/\n/)){const p=line.indexOf('=');if(p>0){const k=normWord(line.slice(0,p).trim());const v=line.slice(p+1).trim();if(k&&v)m[k]=v}}return m}
-function getJP(t){const k=normWord(t);const cm=customMap();return cm[k]||DICT[k]||null}
-function render(level){
- const result=document.getElementById('result'),src=document.getElementById('src').value.trim();if(!src)return;
- result.innerHTML='';
- for(const t of tokens(src)){
-  if(!isWord(t)){result.appendChild(document.createTextNode(t));continue}
-  const s=document.createElement('span');s.className='word';s.dataset.en=t;s.textContent=t;
-  const jp=getJP(t);
-  if(content(t)&&jp&&seeded(t)<level){s.classList.add('jp');s.dataset.jp=jp;s.textContent=jp;s.title=`${t} ⇄ ${jp}`}
-  else if(content(t)&&!jp)s.classList.add('unknown');
-  s.onclick=()=>{if(!s.dataset.jp)return;const on=s.classList.toggle('jp');s.textContent=on?s.dataset.jp:s.dataset.en};
-  result.appendChild(s);
- }
-}
-function mix(){
- stopSpeech();const src=document.getElementById('src').value.trim(),status=document.getElementById('status');
- if(!src){status.textContent='本文を入力してください。';return}
- expected=tokens(src).filter(isWord).map(normWord);
- const ts=tokens(src),contentCount=ts.filter(content).length,known=ts.filter(t=>content(t)&&getJP(t)).length;
- render(+document.getElementById('level').value);
- status.textContent=`完成：意味の中心語 ${contentCount}語のうち、${known}語に日本語のヒントがあります。`;
- document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent='';
-}
+function key(t){return t.toLowerCase().replace(/[’']/g,"'")}
+function isContent(t){return isWord(t)&&!FUNCTION_WORDS.has(key(t))&&key(t).length>1}
+function customMap(){const m={};for(const line of (document.getElementById('custom').value||'').split(/\n/)){const p=line.indexOf('=');if(p>0){const k=key(line.slice(0,p).trim()),v=line.slice(p+1).trim();if(k&&v)m[k]=v}}return m}
+function getGloss(t){const k=key(t);return customMap()[k]||GLOSS[k]||null}
+function stableScore(t){let h=2166136261;for(const c of key(t)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return (h>>>0)%100}
+function render(level){const result=document.getElementById('result');result.innerHTML='';const src=document.getElementById('src').value.trim();if(!src)return;for(const t of tokenize(src)){if(!isWord(t)){result.appendChild(document.createTextNode(t));continue}const s=document.createElement('span');s.className='word';s.dataset.en=t;s.textContent=t;const jp=getGloss(t);if(isContent(t)&&jp&&stableScore(t)<level){s.classList.add('jp');s.dataset.jp=jp;s.textContent=jp;s.title=`${t} ⇄ ${jp}`}else if(isContent(t)&&!jp)s.classList.add('unknown');s.addEventListener('click',()=>{if(!s.dataset.jp)return;s.classList.toggle('jp');s.textContent=s.classList.contains('jp')?s.dataset.jp:s.dataset.en});result.appendChild(s)}}
+function mix(){stopSpeech();const src=document.getElementById('src').value.trim();if(!src){document.getElementById('status').textContent='本文を入力してください。';return}expected=tokenize(src).filter(isWord).map(key);const ts=tokenize(src);const contentCount=ts.filter(isContent).length;const known=ts.filter(t=>isContent(t)&&getGloss(t)).length;render(Number(document.getElementById('level').value));document.getElementById('status').textContent=`完成：意味の中心語 ${contentCount}語のうち、${known}語に日本語ヒントがあります。`;
+ document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent=''}
 function normalize(s){return s.toLowerCase().replace(/[^a-z'\s-]/g,' ').replace(/\s+/g,' ').trim().split(' ').filter(Boolean)}
 function editDistance(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
-function showScore(){const heard=normalize(finalText),n=Math.max(expected.length,heard.length,1);const score=Math.max(0,Math.round(100*(1-editDistance(expected,heard)/n)));document.getElementById('score').innerHTML=`<div class="score">音読スコア：${score} / 100</div>`;document.getElementById('transcript').textContent=`認識結果：${finalText.trim()||'（認識できませんでした）'}`}
-
-async function requestMic(){
- if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){document.getElementById('diag').textContent='この端末ではマイクへのアクセス機能を確認できません。ブラウザの対応状況を確認してください。';return false}
- try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(t=>t.stop());document.getElementById('diag').innerHTML='<span class="good">✓ マイクの利用許可を確認しました。</span>';return true}
- catch(e){let msg='マイクを利用できませんでした。';if(e.name==='NotAllowedError')msg='マイクの利用が拒否されています。ブラウザのサイト設定でマイクを許可してください。';if(e.name==='NotFoundError')msg='マイクが見つかりませんでした。';document.getElementById('diag').innerHTML=`<span class="warn">${msg}</span>`;document.getElementById('speechState').textContent='マイクを確認できませんでした。';return false}
-}
-function makeRecognition(){
- const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){document.getElementById('speechState').textContent='このブラウザではブラウザ音声認識が利用できません。PCのChrome / Edgeなどで試してください。';return null}
- const r=new SR();r.lang='en-US';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;
- r.onstart=()=>{recognizing=true;document.getElementById('speechState').textContent='音読を認識中… 読み終わったら「停止」を押してください。';document.getElementById('mic').disabled=true;document.getElementById('stop').disabled=false};
- r.onresult=e=>{let text='';for(let i=e.resultIndex;i<e.results.length;i++)text+=' '+e.results[i][0].transcript;finalText+=(text||'');document.getElementById('transcript').textContent=`認識結果（途中）：${finalText.trim()}`};
- r.onerror=e=>{recognizing=false;document.getElementById('speechState').textContent=`音声認識エラー：${e.error}`;document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true};
- r.onend=()=>{if(recognizing){recognizing=false;document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true;document.getElementById('speechState').textContent='音読チェック終了';showScore()}};
- return r;
-}
-async function startSpeech(){
- if(!expected.length){alert('先に「日本語を混ぜる」を実行してください。');return}
- finalText='';document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent='';
- const ok=await requestMic();if(!ok)return;
- recognition=recognition||makeRecognition();if(!recognition)return;
- try{recognition.start()}catch(e){document.getElementById('speechState').textContent='音声認識を開始できませんでした。もう一度お試しください。'}
-}
+function showScore(){const heard=normalize(finalText),n=Math.max(expected.length,heard.length,1),score=Math.max(0,Math.round(100*(1-editDistance(expected,heard)/n)));document.getElementById('score').innerHTML=`<div class="score">音読スコア：${score} / 100</div>`;document.getElementById('transcript').textContent=`認識結果：${finalText.trim()||'（認識できませんでした）'}`}
+async function requestMic(){if(!navigator.mediaDevices?.getUserMedia){document.getElementById('diag').textContent='この端末ではマイク機能を利用できません。';return false}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(t=>t.stop());document.getElementById('diag').innerHTML='<span class="good">✓ マイクの利用許可を確認しました。</span>';return true}catch(e){let msg='マイクを利用できませんでした。';if(e.name==='NotAllowedError')msg='マイクの利用が拒否されています。ブラウザのサイト設定で許可してください。';if(e.name==='NotFoundError')msg='マイクが見つかりませんでした。';document.getElementById('diag').innerHTML=`<span class="warn">${msg}</span>`;return false}}
+function makeRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById('speechState').textContent='このブラウザではブラウザ音声認識が利用できません。';return null}const r=new SR();r.lang='en-US';r.continuous=false;r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>{recognizing=true;document.getElementById('speechState').textContent='音読を認識中… 読み終わったら「停止」を押してください。';document.getElementById('mic').disabled=true;document.getElementById('stop').disabled=false};r.onresult=e=>{let text='';for(let i=e.resultIndex;i<e.results.length;i++)text+=' '+e.results[i][0].transcript;finalText+=(text||'')};r.onerror=e=>{recognizing=false;document.getElementById('speechState').textContent=`音声認識エラー：${e.error}`;document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true};r.onend=()=>{if(recognizing){recognizing=false;document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true;document.getElementById('speechState').textContent='音読チェック終了';showScore()}};return r}
+async function startSpeech(){if(!expected.length){alert('先に「日本語を混ぜる」を実行してください。');return}finalText='';document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent='';if(!await requestMic())return;recognition=makeRecognition();if(!recognition)return;try{recognition.start()}catch(e){document.getElementById('speechState').textContent='音声認識を開始できませんでした。'}}
 function stopSpeech(){if(!recognition||!recognizing)return;recognizing=false;try{recognition.stop()}catch(e){}document.getElementById('mic').disabled=false;document.getElementById('stop').disabled=true;document.getElementById('speechState').textContent='音読チェック終了';showScore()}
-
-document.getElementById('level').oninput=e=>{document.getElementById('pct').textContent=e.target.value+'%';render(+e.target.value)};
-document.getElementById('mix').onclick=mix;
-document.getElementById('mic').onclick=startSpeech;
-document.getElementById('stop').onclick=stopSpeech;
-document.getElementById('clear').onclick=()=>{stopSpeech();document.getElementById('src').value='';document.getElementById('result').innerHTML='';document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent='';document.getElementById('status').textContent='本文を入力して「日本語を混ぜる」を押してください。';document.getElementById('diag').textContent='開始すると、まずマイクの利用許可を確認します。';expected=[]};
+document.getElementById('level').addEventListener('input',e=>{document.getElementById('pct').textContent=e.target.value+'%';render(Number(e.target.value))});document.getElementById('mix').addEventListener('click',mix);document.getElementById('mic').addEventListener('click',startSpeech);document.getElementById('stop').addEventListener('click',stopSpeech);document.getElementById('clear').addEventListener('click',()=>{stopSpeech();document.getElementById('src').value='';document.getElementById('result').innerHTML='';document.getElementById('score').innerHTML='';document.getElementById('transcript').textContent='';document.getElementById('status').textContent='本文を入力して「日本語を混ぜる」を押してください。';document.getElementById('diag').textContent='開始すると、まずマイクの利用許可を確認します。';expected=[]});
 </script>
 </body>
 </html>
